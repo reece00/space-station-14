@@ -2,6 +2,7 @@ using System.Linq;
 using Content.Client.DisplacementMap;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
+using Content.Shared.Doors.Components;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.Damage.Systems;
 using Content.Shared.DisplacementMap;
@@ -368,6 +369,21 @@ public sealed partial class DamageVisualsSystem : VisualizerSystem<DamageVisuals
             damageVisComp.Displacement = null;
 
         HandleDamage(uid, args, damageVisComp);
+
+        // The windoor's glass moves when the door opens, but its damage overlay does not.
+        // Hide the overlay while moving/open and restore it when closed, even if the
+        // damage threshold itself has not changed.
+        if (damageVisComp.HideWhenDoorOpen &&
+            damageVisComp.TrackAllDamage &&
+            TryComp<SpriteComponent>(uid, out var sprite) &&
+            SpriteSystem.LayerMapTryGet((uid, sprite), "DamageOverlay", out var layer, false))
+        {
+            var visible = damageVisComp.LastDamageThreshold > FixedPoint2.Zero;
+            if (args.TryGetData<DoorState>(DoorVisuals.State, out var state))
+                visible &= state is not (DoorState.Open or DoorState.Opening or DoorState.Closing);
+
+            SpriteSystem.LayerSetVisible((uid, sprite), layer, visible);
+        }
     }
 
     private void HandleDamage(EntityUid uid, AppearanceChangeEvent args, DamageVisualsComponent damageVisComp)

@@ -6,6 +6,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.Damage;
+using Content.Shared.Doors.Components;
 using Robust.Shared.Random;
 using Robust.Shared.Threading;
 
@@ -272,6 +273,18 @@ public sealed partial class AtmosphereSystem
         var appliedDamage = ScaleDamage(ent, ent.Comp.BaseDamage, maxPressureCapped);
 
         _damage.ChangeDamage(ent.Owner, appliedDamage, ignoreResistances: true, interruptsDoAfters: false);
+
+        // Opt-in warning for fragile pressure barriers, rate-limited per entity.
+        // Don't play the stationary-glass crack sound while a windoor is moving.
+        if (TryComp<PressureDamageSoundComponent>(ent, out var sound) &&
+            (!TryComp<DoorComponent>(ent, out var door) ||
+             door.State is DoorState.Closed or DoorState.Denying or DoorState.Emagging) &&
+            _gameTiming.CurTime >= sound.NextSoundTime)
+        {
+            sound.NextSoundTime = _gameTiming.CurTime + sound.Cooldown;
+            _audio.PlayPvs(sound.Sound, ent.Owner);
+        }
+
         SetIsTakingDamageState(ent, true);
     }
 
