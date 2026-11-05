@@ -3,6 +3,11 @@
   parent: BaseWindoor
   name: windoor
   description: It's a window and a sliding door. Wow!
+  components:
+  # Windoors have more structural health than directional windows.
+  # Adjust the pressure damage slope separately without affecting plasma or uranium windoors.
+  - type: DeltaPressure
+    scalingPower: 0.0045
 
 - type: entity
   id: WindoorPlasma
