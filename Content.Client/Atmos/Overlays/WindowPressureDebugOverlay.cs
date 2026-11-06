@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Client.Atmos.EntitySystems;
+using Content.Client.Stylesheets.Fonts;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
@@ -29,7 +30,7 @@ internal sealed class WindowPressureDebugOverlay : Overlay
 
         _system = system;
         _transform = _entities.System<SharedTransformSystem>();
-        _font = _resources.GetFont("/Fonts/NotoSans/NotoSans-Regular.ttf", 12);
+        _font = new NotoFontFamilyStack(_resources).GetFont(12);
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -41,8 +42,8 @@ internal sealed class WindowPressureDebugOverlay : Overlay
         {
             foreach (var data in message.Windows)
             {
-                if (_entities.GetEntity(data.EntityId) is not { } uid ||
-                    !_entities.TryGetComponent(uid, out TransformComponent? xform) ||
+                if (!_entities.TryGetEntity(data.EntityId, out var uid) ||
+                    !_entities.TryGetComponent(uid.Value, out TransformComponent? xform) ||
                     xform.MapID != args.MapId)
                     continue;
 
