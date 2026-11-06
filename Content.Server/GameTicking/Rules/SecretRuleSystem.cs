@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Server.Administration.Logs;
-using Content.Server.GameTicking;
 using Content.Server.GameTicking.Rules.Components;
 using Content.Shared.GameTicking.Components;
 using Content.Shared.Random;
@@ -27,12 +26,14 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
     [Dependency] private IConfigurationManager _configurationManager = default!;
     [Dependency] private IAdminLogManager _adminLogger = default!;
 
-    private const int ConsecutiveRoundsBeforePenalty = 2;
-    private const float RepeatedModeWeightMultiplier = 0.2f;
+    private const string SecretPresetId = "Secret";
 
-    private string? _lastPlayedMode;
-    private int _consecutiveModeRounds;
-    private string? _pendingSecretMode;
+    // The preset actually played last round (for Secret, the preset it picked) and its current streak.
+    private string? _lastPlayedPreset;
+    private int _consecutivePresetRounds;
+
+    // The preset Secret picked for the round that is about to start.
+    private string? _pendingSecretPreset;
 
     public override void Initialize()
     {
@@ -45,12 +46,14 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
         if (args.New != GameRunLevel.InRound)
             return;
 
-        var currentPreset = (GameTicker as ServerGameTicker)?.CurrentPreset?.ID;
-        var playedMode = currentPreset == "Secret" ? _pendingSecretMode : currentPreset;
-        _consecutiveModeRounds = playedMode == null ? 0 :
-            playedMode == _lastPlayedMode ? _consecutiveModeRounds + 1 : 1;
-        _lastPlayedMode = playedMode;
-        _pendingSecretMode = null;
+        // CurrentPreset only exists on the server ticker.
+        var playedPreset = (GameTicker as ServerGameTicker)?.CurrentPreset?.ID;
+        if (playedPreset == SecretPresetId)
+            playedPreset = _pendingSecretPreset;
+
+        _consecutivePresetRounds = playedPreset == _lastPlayedPreset ? _consecutivePresetRounds + 1 : 1;
+        _lastPlayedPreset = playedPreset;
+        _pendingSecretPreset = null;
     }
 
     protected override void Added(Entity<SecretRuleComponent, GameRuleComponent> ent, ref GameRuleAddedEvent args)
@@ -65,7 +68,7 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
             return;
         }
 
-        _pendingSecretMode = preset.ID;
+        _pendingSecretPreset = preset.ID;
 
         Log.Info($"Selected {preset.ID} as the secret preset.");
         _adminLogger.Add(LogType.EventStarted, $"Selected {preset.ID} as the secret preset.");
@@ -109,12 +112,14 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
         var options = ProtoMan.Index(weights).Weights.ShallowClone();
         var players = GameTicker.ReadyPlayerCount();
 
-        if (_consecutiveModeRounds >= ConsecutiveRoundsBeforePenalty &&
-            _lastPlayedMode is { } lastMode &&
-            options.TryGetValue(lastMode, out var weight))
+        if (_configurationManager.GetCVar(CCVars.SecretRepeatPenaltyEnabled) &&
+            _consecutivePresetRounds >= _configurationManager.GetCVar(CCVars.SecretRepeatPenaltyRounds) &&
+            _lastPlayedPreset is { } lastPreset &&
+            options.TryGetValue(lastPreset, out var lastWeight))
         {
-            Log.Info($"Applying repeat penalty to {lastMode} after {_consecutiveModeRounds} consecutive rounds.");
-            options[lastMode] = weight * RepeatedModeWeightMultiplier;
+            var multiplier = Math.Clamp(_configurationManager.GetCVar(CCVars.SecretRepeatPenaltyMultiplier), 0f, 1f);
+            Log.Info($"Applying repeat penalty to {lastPreset} after {_consecutivePresetRounds} consecutive rounds.");
+            options[lastPreset] = lastWeight * multiplier;
         }
 
         GamePresetPrototype? selectedPreset = null;

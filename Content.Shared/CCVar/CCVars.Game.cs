@@ -399,6 +399,24 @@ public sealed partial class CCVars
         CVarDef.Create("game.secret_weight_prototype", "Secret", CVar.SERVERONLY);
 
     /// <summary>
+    ///     Whether Secret should reduce the weight of the preset that was played several rounds in a row.
+    /// </summary>
+    public static readonly CVarDef<bool> SecretRepeatPenaltyEnabled =
+        CVarDef.Create("game.secret_repeat_penalty_enabled", true, CVar.SERVERONLY);
+
+    /// <summary>
+    ///     How many consecutive rounds of the same preset must have been played before Secret penalizes it.
+    /// </summary>
+    public static readonly CVarDef<int> SecretRepeatPenaltyRounds =
+        CVarDef.Create("game.secret_repeat_penalty_rounds", 2, CVar.SERVERONLY);
+
+    /// <summary>
+    ///     Multiplier applied to the Secret weight of a repeated preset. Clamped to the range 0 to 1.
+    /// </summary>
+    public static readonly CVarDef<float> SecretRepeatPenaltyMultiplier =
+        CVarDef.Create("game.secret_repeat_penalty_multiplier", 0.2f, CVar.SERVERONLY);
+
+    /// <summary>
     ///     The id of the sound collection to randomly choose a sound from and play when the round ends.
     /// </summary>
     public static readonly CVarDef<string> RoundEndSoundCollection =
