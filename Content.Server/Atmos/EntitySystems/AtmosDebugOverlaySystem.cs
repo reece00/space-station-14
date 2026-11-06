@@ -191,13 +191,13 @@ namespace Content.Server.Atmos.EntitySystems
                 : -1f;
             var elapsed = _gameTiming.CurTime - trace.StartedAt;
             var name = Exists(entity.Owner) ? ToPrettyString(entity.Owner) : $"entity {entity.Owner}";
-            var thresholdText = thresholdDamage >= 0f ? $"，损坏阈值 {thresholdDamage:F1}" : string.Empty;
+            var thresholdText = thresholdDamage >= 0f ? $", threshold={thresholdDamage:F1}" : string.Empty;
 
             var message =
-                $"[气压调试] {name} 在 {elapsed.TotalSeconds:F2} 秒后损坏；" +
-                $"损坏前气压 {trace.Pressure:F1}，压差 {trace.DeltaPressure:F1}，有效压力 {trace.EffectivePressure:F1}；" +
-                $"累计伤害 {trace.DamageBeforeLastTick:F1} + {trace.DamagePerTick:F1} = {finalDamage:F1}" +
-                $"，采样 {trace.Samples} 次{thresholdText}。";
+                $"[PressureDebug] {name} broke after {elapsed.TotalSeconds:F2}s; " +
+                $"final pressure={trace.Pressure:F1}, delta={trace.DeltaPressure:F1}, effective={trace.EffectivePressure:F1}; " +
+                $"damage={trace.DamageBeforeLastTick:F1}+{trace.DamagePerTick:F1}={finalDamage:F1}, " +
+                $"samples={trace.Samples}{thresholdText}.";
             var wrappedMessage = Loc.GetString(
                 "chat-manager-server-wrap-message",
                 ("message", FormattedMessage.EscapeText(message)));
