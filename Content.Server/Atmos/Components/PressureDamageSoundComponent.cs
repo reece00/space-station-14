@@ -10,7 +10,7 @@ namespace Content.Server.Atmos.Components;
 public sealed partial class PressureDamageSoundComponent : Component
 {
     [DataField]
-    public SoundSpecifier Sound = new SoundCollectionSpecifier("GlassCrack", AudioParams.Default.AddVolume(-8f));
+    public SoundSpecifier Sound = new SoundCollectionSpecifier("GlassCrack", AudioParams.Default.AddVolume(6f));
 
     /// <summary>
     /// Minimum time between warning sounds on this entity.

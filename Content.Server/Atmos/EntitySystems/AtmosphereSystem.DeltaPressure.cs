@@ -282,6 +282,7 @@ public sealed partial class AtmosphereSystem
             _gameTiming.CurTime >= sound.NextSoundTime)
         {
             sound.NextSoundTime = _gameTiming.CurTime + sound.Cooldown;
+            Log.Info($"[PressureSound] Attempting crack sound for {ent.Owner} at {_gameTiming.CurTime.TotalSeconds:F1}s.");
             _audio.PlayPvs(sound.Sound, ent.Owner);
         }
 
