@@ -114,8 +114,9 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
             options.TryGetValue(lastPreset, out var lastWeight))
         {
             var multiplier = Math.Clamp(_configurationManager.GetCVar(CCVars.SecretRepeatPenaltyMultiplier), 0f, 1f);
-            Log.Info($"Applying repeat penalty to {lastPreset} after {_consecutivePresetRounds} consecutive rounds.");
-            options[lastPreset] = lastWeight * multiplier;
+            var penalizedWeight = lastWeight * multiplier;
+            Log.Info($"{lastPreset} was played {_consecutivePresetRounds} rounds in a row, lowering its secret weight from {lastWeight} to {penalizedWeight}. Set {CCVars.SecretRepeatPenaltyEnabled.Name} to false to disable.");
+            options[lastPreset] = penalizedWeight;
         }
 
         GamePresetPrototype? selectedPreset = null;

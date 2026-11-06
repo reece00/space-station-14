@@ -414,7 +414,7 @@ public sealed partial class CCVars
     ///     The weight multiplier for a repeating preset, between 0 and 1.
     /// </summary>
     public static readonly CVarDef<float> SecretRepeatPenaltyMultiplier =
-        CVarDef.Create("game.secret_repeat_penalty_multiplier", 0.2f, CVar.SERVERONLY);
+        CVarDef.Create("game.secret_repeat_penalty_multiplier", 0.3f, CVar.SERVERONLY);
 
     /// <summary>
     ///     The id of the sound collection to randomly choose a sound from and play when the round ends.
