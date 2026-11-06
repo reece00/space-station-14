@@ -12,7 +12,7 @@ namespace Content.Client.Atmos.Overlays;
 /// Screen-space, opt-in overlay for testing window pressure damage.
 /// Samples come from the server, not locally predicted atmospherics.
 /// </summary>
-internal sealed class WindowPressureDebugOverlay : Overlay
+internal sealed partial class WindowPressureDebugOverlay : Overlay
 {
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IEyeManager _eye = default!;
