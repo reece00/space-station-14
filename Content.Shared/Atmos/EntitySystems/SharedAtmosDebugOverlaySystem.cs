@@ -44,6 +44,43 @@ namespace Content.Shared.Atmos.EntitySystems
             }
         }
 
+        /// <summary>
+        /// Snapshot of the same four effective directional pressures used by DeltaPressure damage.
+        /// BreakThreshold is -1 if this entity has no simple breakage/destruction threshold.
+        /// </summary>
+        [Serializable, NetSerializable]
+        public readonly record struct WindowPressureDebugData(
+            NetEntity EntityId,
+            float Damage,
+            float BreakThreshold,
+            float North,
+            float South,
+            float East,
+            float West,
+            float MaxPressure,
+            float DeltaPressure,
+            float MinPressure,
+            float MinPressureDelta,
+            bool IsTakingDamage);
+
+        [Serializable, NetSerializable]
+        public sealed class WindowPressureDebugOverlayMessage : EntityEventArgs
+        {
+            public NetEntity GridId { get; }
+            public WindowPressureDebugData[] Windows { get; }
+
+            public WindowPressureDebugOverlayMessage(NetEntity gridId, WindowPressureDebugData[] windows)
+            {
+                GridId = gridId;
+                Windows = windows;
+            }
+        }
+
+        [Serializable, NetSerializable]
+        public sealed class WindowPressureDebugOverlayDisableMessage : EntityEventArgs
+        {
+        }
+
         [Serializable, NetSerializable]
         public sealed class AtmosDebugOverlayDisableMessage : EntityEventArgs
         {

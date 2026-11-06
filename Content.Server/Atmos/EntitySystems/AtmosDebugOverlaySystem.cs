@@ -1,6 +1,11 @@
 using System.Numerics;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
+using Content.Server.Atmos.Components;
+using Content.Server.Destructible;
+using Content.Shared.Damage.Components;
+using Content.Shared.Damage.Systems;
+using Content.Shared.FixedPoint;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
 using JetBrains.Annotations;
@@ -21,6 +26,8 @@ namespace Content.Server.Atmos.EntitySystems
         [Dependency] private IConfigurationManager _configManager = default!;
         [Dependency] private SharedTransformSystem _transform = default!;
         [Dependency] private MapSystem _mapSystem = default!;
+        [Dependency] private DamageableSystem _damageable = default!;
+        [Dependency] private DestructibleSystem _destructible = default!;
 
         /// <summary>
         ///     Players allowed to see the atmos debug overlay.
@@ -28,6 +35,7 @@ namespace Content.Server.Atmos.EntitySystems
         ///     <see cref="RemoveObserver"/>.
         /// </summary>
         private readonly HashSet<ICommonSession> _playerObservers = new();
+        private readonly HashSet<ICommonSession> _windowObservers = new();
 
         /// <summary>
         ///     Overlay update ticks per second.
@@ -88,11 +96,25 @@ namespace Content.Server.Atmos.EntitySystems
             return true;
         }
 
+        public bool ToggleWindowObserver(ICommonSession observer)
+        {
+            if (_windowObservers.Remove(observer))
+            {
+                RaiseNetworkEvent(new WindowPressureDebugOverlayDisableMessage(), observer.Channel);
+                return false;
+            }
+
+            _windowObservers.Add(observer);
+            return true;
+        }
+
         private void OnPlayerStatusChanged(object? sender, SessionStatusEventArgs e)
         {
             if (e.NewStatus != SessionStatus.InGame)
             {
                 RemoveObserver(e.Session);
+                if (_windowObservers.Remove(e.Session))
+                    RaiseNetworkEvent(new WindowPressureDebugOverlayDisableMessage(), e.Session.Channel);
             }
         }
 
@@ -114,6 +136,9 @@ namespace Content.Server.Atmos.EntitySystems
 
         public override void Update(float frameTime)
         {
+            if (_playerObservers.Count == 0 && _windowObservers.Count == 0)
+                return;
+
             AccumulatedFrameTime += frameTime;
             _updateCooldown = 1 / _configManager.GetCVar(CCVars.NetAtmosDebugOverlayTickRate);
 
@@ -168,6 +193,94 @@ namespace Content.Server.Atmos.EntitySystems
 
                     var msg = new AtmosDebugOverlayMessage(GetNetEntity(grid), baseTile, debugOverlayContent);
                     RaiseNetworkEvent(msg, session.Channel);
+                }
+            }
+
+            SendWindowPressureDebugData();
+        }
+
+        private static float PressureAt(GridAtmosphereComponent atmosphere, Vector2i tile)
+        {
+            return atmosphere.Tiles.TryGetValue(tile, out var airTile)
+                ? airTile.Air?.Pressure ?? 0f
+                : 0f;
+        }
+
+        private void SendWindowPressureDebugData()
+        {
+            foreach (var session in _windowObservers)
+            {
+                if (session.AttachedEntity is not { Valid: true } player)
+                    continue;
+
+                var playerTransform = Transform(player);
+                var playerPos = _transform.GetWorldPosition(playerTransform);
+                var bounds = Box2.CenteredAround(playerPos, new Vector2(LocalViewRange, LocalViewRange));
+
+                _grids.Clear();
+                _mapSystem.FindGridsIntersecting(playerTransform.MapID, bounds, ref _grids);
+
+                foreach (var grid in _grids)
+                {
+                    if (!Exists(grid.Owner) || !TryComp(grid.Owner, out GridAtmosphereComponent? atmosphere))
+                        continue;
+
+                    var center = _mapSystem.GetTileRef(grid, grid, playerTransform.Coordinates).GridIndices;
+                    var windows = new List<WindowPressureDebugData>();
+
+                    foreach (var entity in atmosphere.DeltaPressureEntities)
+                    {
+                        var uid = entity.Owner;
+                        if (!Exists(uid) ||
+                            !TryComp(uid, out AirtightComponent? airtight) ||
+                            !TryComp(uid, out DamageableComponent? damageable) ||
+                            !TryComp(uid, out DestructibleComponent? destructible))
+                            continue;
+
+                        var tile = airtight.LastPosition.Tile;
+                        if (Math.Abs(tile.X - center.X) > LocalViewRange / 2 ||
+                            Math.Abs(tile.Y - center.Y) > LocalViewRange / 2)
+                            continue;
+
+                        var north = PressureAt(atmosphere, tile.Offset(AtmosDirection.North));
+                        var south = PressureAt(atmosphere, tile.Offset(AtmosDirection.South));
+                        var east = PressureAt(atmosphere, tile.Offset(AtmosDirection.East));
+                        var west = PressureAt(atmosphere, tile.Offset(AtmosDirection.West));
+
+                        // Match the directional-window substitution in ProcessDeltaPressureEntityBulk.
+                        if (!airtight.NoAirWhenFullyAirBlocked)
+                        {
+                            var local = PressureAt(atmosphere, tile);
+                            var blocked = airtight.AirBlockedDirection;
+                            if (!blocked.IsFlagSet(AtmosDirection.North)) north = local;
+                            if (!blocked.IsFlagSet(AtmosDirection.South)) south = local;
+                            if (!blocked.IsFlagSet(AtmosDirection.East)) east = local;
+                            if (!blocked.IsFlagSet(AtmosDirection.West)) west = local;
+                        }
+
+                        var maxPressure = MathF.Max(MathF.Max(north, south), MathF.Max(east, west));
+                        var delta = MathF.Max(MathF.Abs(north - south), MathF.Abs(east - west));
+                        var threshold = _destructible.DestroyedAt(uid, destructible);
+                        var breakThreshold = threshold == FixedPoint2.MaxValue ? -1f : threshold.Float();
+
+                        windows.Add(new WindowPressureDebugData(
+                            GetNetEntity(uid),
+                            _damageable.GetTotalDamage((uid, damageable)).Float(),
+                            breakThreshold,
+                            north,
+                            south,
+                            east,
+                            west,
+                            maxPressure,
+                            delta,
+                            entity.Comp.MinPressure,
+                            entity.Comp.MinPressureDelta,
+                            entity.Comp.IsTakingDamage));
+                    }
+
+                    RaiseNetworkEvent(
+                        new WindowPressureDebugOverlayMessage(GetNetEntity(grid), windows.ToArray()),
+                        session.Channel);
                 }
             }
         }
