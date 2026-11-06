@@ -268,6 +268,14 @@ public sealed partial class AtmosphereSystem
     /// <param name="deltaPressure">The delta pressure being exerted on the entity.</param>
     private void PerformDamage(Entity<DeltaPressureComponent> ent, float pressure, float deltaPressure)
     {
+        // A moving or open windoor has no stationary glass barrier to damage.
+        if (TryComp<DoorComponent>(ent, out var door) &&
+            door.State is DoorState.Open or DoorState.Opening or DoorState.Closing)
+        {
+            SetIsTakingDamageState(ent, false);
+            return;
+        }
+
         var maxPressure = Math.Max(pressure - ent.Comp.MinPressure, deltaPressure - ent.Comp.MinPressureDelta);
         var maxPressureCapped = Math.Min(maxPressure, ent.Comp.MaxEffectivePressure);
         var appliedDamage = ScaleDamage(ent, ent.Comp.BaseDamage, maxPressureCapped);
@@ -275,10 +283,7 @@ public sealed partial class AtmosphereSystem
         _damage.ChangeDamage(ent.Owner, appliedDamage, ignoreResistances: true, interruptsDoAfters: false);
 
         // Opt-in warning for fragile pressure barriers, rate-limited per entity.
-        // Don't play the stationary-glass crack sound while a windoor is moving.
         if (TryComp<PressureDamageSoundComponent>(ent, out var sound) &&
-            (!TryComp<DoorComponent>(ent, out var door) ||
-             door.State is DoorState.Closed or DoorState.Denying or DoorState.Emagging) &&
             _gameTiming.CurTime >= sound.NextSoundTime)
         {
             sound.NextSoundTime = _gameTiming.CurTime + sound.Cooldown;
