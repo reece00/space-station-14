@@ -14,12 +14,20 @@
   parent: BasePlasmaWindoor
   name: plasma windoor
   description: It's a pink window *and* a sliding door. Amazing!
+  components:
+  - type: DeltaPressure
+    scalingType: Linear
+    scalingPower: 0.00006
 
 - type: entity
   id: WindoorUranium
   parent: BaseUraniumWindoor
   name: uranium windoor
   description: It's a window and a sliding door. Huh? Oh, and it's green!
+  components:
+  - type: DeltaPressure
+    scalingType: Linear
+    scalingPower: 0.00006
 
 # TODO remove these with parameterized prototypes/whatever we end up doing
 # Please sort these alphabetically
