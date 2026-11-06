@@ -268,9 +268,10 @@ public sealed partial class AtmosphereSystem
     /// <param name="deltaPressure">The delta pressure being exerted on the entity.</param>
     private void PerformDamage(Entity<DeltaPressureComponent> ent, float pressure, float deltaPressure)
     {
-        // A moving or open windoor has no stationary glass barrier to damage.
-        if (TryComp<DoorComponent>(ent, out var door) &&
-            door.State is DoorState.Open or DoorState.Opening or DoorState.Closing)
+        // Only damage doors while they are actually blocking airflow.
+        if (TryComp<DoorComponent>(ent, out _) &&
+            TryComp<AirtightComponent>(ent, out var airtight) &&
+            !airtight.AirBlocked)
         {
             SetIsTakingDamageState(ent, false);
             return;
