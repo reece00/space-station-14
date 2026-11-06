@@ -24,6 +24,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
 using Robust.Shared.Maths;
+using Robust.Shared.Utility;
 
 namespace Content.Server.Atmos.EntitySystems
 {
@@ -197,11 +198,14 @@ namespace Content.Server.Atmos.EntitySystems
                 $"损坏前气压 {trace.Pressure:F1}，压差 {trace.DeltaPressure:F1}，有效压力 {trace.EffectivePressure:F1}；" +
                 $"累计伤害 {trace.DamageBeforeLastTick:F1} + {trace.DamagePerTick:F1} = {finalDamage:F1}" +
                 $"，采样 {trace.Samples} 次{thresholdText}。";
+            var wrappedMessage = Loc.GetString(
+                "chat-manager-server-wrap-message",
+                ("message", FormattedMessage.EscapeText(message)));
 
             _chatManager.ChatMessageToMany(
                 ChatChannel.Server,
                 message,
-                message,
+                wrappedMessage,
                 EntityUid.Invalid,
                 hideChat: false,
                 recordReplay: false,
