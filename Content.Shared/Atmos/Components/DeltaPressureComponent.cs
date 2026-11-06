@@ -90,6 +90,13 @@ public sealed partial class DeltaPressureComponent : Component
     public float MinPressureDelta = 7500;
 
     /// <summary>
+    /// Whether absolute pressure can cause damage without a pressure difference.
+    /// Keep this enabled for full-tile structures until multi-layer windows are handled correctly.
+    /// </summary>
+    [DataField]
+    public bool UseAbsolutePressure = true;
+
+    /// <summary>
     /// The maximum pressure at which damage will no longer scale.
     /// If the effective pressure goes beyond this, the damage will be considered at this pressure.
     /// </summary>
