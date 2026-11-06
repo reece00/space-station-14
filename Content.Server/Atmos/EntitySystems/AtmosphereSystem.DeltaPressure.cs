@@ -279,6 +279,15 @@ public sealed partial class AtmosphereSystem
         var maxPressureCapped = Math.Min(maxPressure, ent.Comp.MaxEffectivePressure);
         var appliedDamage = ScaleDamage(ent, ent.Comp.BaseDamage, maxPressureCapped);
 
+        // Let the debug overlay record the exact pressure sample that caused this damage.
+        // This is raised before ChangeDamage so a threshold that destroys the entity immediately
+        // still has a complete final sample available to the debug logger.
+        RaiseLocalEvent(ent.Owner, new DeltaPressureDamageAppliedEvent(
+            pressure,
+            deltaPressure,
+            maxPressureCapped,
+            appliedDamage), true);
+
         _damage.ChangeDamage(ent.Owner, appliedDamage, ignoreResistances: true, interruptsDoAfters: false);
 
         if (!TerminatingOrDeleted(ent) &&
@@ -290,6 +299,31 @@ public sealed partial class AtmosphereSystem
         }
 
         SetIsTakingDamageState(ent, true);
+    }
+
+    /// <summary>
+    /// Raised immediately before delta-pressure damage is applied to an entity.
+    /// Server-side debug systems use this to record the final pressure sample without
+    /// changing the normal damage pipeline.
+    /// </summary>
+    public sealed class DeltaPressureDamageAppliedEvent : EntityEventArgs
+    {
+        public readonly float Pressure;
+        public readonly float DeltaPressure;
+        public readonly float EffectivePressure;
+        public readonly DamageSpecifier Damage;
+
+        public DeltaPressureDamageAppliedEvent(
+            float pressure,
+            float deltaPressure,
+            float effectivePressure,
+            DamageSpecifier damage)
+        {
+            Pressure = pressure;
+            DeltaPressure = deltaPressure;
+            EffectivePressure = effectivePressure;
+            Damage = damage;
+        }
     }
 
     /// <summary>

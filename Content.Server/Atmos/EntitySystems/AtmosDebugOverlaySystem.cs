@@ -1,10 +1,16 @@
 using System.Numerics;
+using System.Linq;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Server.Atmos.Components;
 using Content.Server.Destructible;
+using Content.Server.Destructible.Thresholds.Behaviors;
+using Content.Server.Chat.Managers;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Chat;
+using Content.Shared.Destructible;
+using Content.Shared.Destructible.Thresholds.Triggers;
 using Content.Shared.FixedPoint;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
@@ -16,6 +22,8 @@ using Robust.Shared.Enums;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Player;
+using Robust.Shared.Timing;
+using Robust.Shared.Maths;
 
 namespace Content.Server.Atmos.EntitySystems
 {
@@ -28,6 +36,8 @@ namespace Content.Server.Atmos.EntitySystems
         [Dependency] private MapSystem _mapSystem = default!;
         [Dependency] private DamageableSystem _damageable = default!;
         [Dependency] private DestructibleSystem _destructible = default!;
+        [Dependency] private IChatManager _chatManager = default!;
+        [Dependency] private IGameTiming _gameTiming = default!;
 
         /// <summary>
         ///     Players allowed to see the atmos debug overlay.
@@ -36,6 +46,24 @@ namespace Content.Server.Atmos.EntitySystems
         /// </summary>
         private readonly HashSet<ICommonSession> _playerObservers = new();
         private readonly HashSet<ICommonSession> _windowObservers = new();
+
+        private sealed class PressureDamageTrace
+        {
+            public readonly TimeSpan StartedAt;
+            public float Pressure;
+            public float DeltaPressure;
+            public float EffectivePressure;
+            public float DamagePerTick;
+            public float DamageBeforeLastTick;
+            public int Samples;
+
+            public PressureDamageTrace(TimeSpan startedAt)
+            {
+                StartedAt = startedAt;
+            }
+        }
+
+        private readonly Dictionary<EntityUid, PressureDamageTrace> _pressureDamageTraces = new();
 
         /// <summary>
         ///     Overlay update ticks per second.
@@ -48,6 +76,8 @@ namespace Content.Server.Atmos.EntitySystems
         {
             base.Initialize();
             _playerManager.PlayerStatusChanged += OnPlayerStatusChanged;
+            SubscribeLocalEvent<DeltaPressureComponent, AtmosphereSystem.DeltaPressureDamageAppliedEvent>(OnDeltaPressureDamageApplied);
+            SubscribeLocalEvent<DestructibleComponent, DamageThresholdReached>(OnDamageThresholdReached);
         }
 
         public override void Shutdown()
@@ -101,6 +131,8 @@ namespace Content.Server.Atmos.EntitySystems
             if (_windowObservers.Remove(observer))
             {
                 RaiseNetworkEvent(new WindowPressureDebugOverlayDisableMessage(), observer.Channel);
+                if (_windowObservers.Count == 0)
+                    _pressureDamageTraces.Clear();
                 return false;
             }
 
@@ -115,7 +147,73 @@ namespace Content.Server.Atmos.EntitySystems
                 RemoveObserver(e.Session);
                 if (_windowObservers.Remove(e.Session))
                     RaiseNetworkEvent(new WindowPressureDebugOverlayDisableMessage(), e.Session.Channel);
+
+                if (_windowObservers.Count == 0)
+                    _pressureDamageTraces.Clear();
             }
+        }
+
+        private void OnDeltaPressureDamageApplied(EntityUid uid, DeltaPressureComponent _, ref AtmosphereSystem.DeltaPressureDamageAppliedEvent args)
+        {
+            if (_windowObservers.Count == 0)
+                return;
+
+            if (!_pressureDamageTraces.TryGetValue(uid, out var trace))
+            {
+                trace = new PressureDamageTrace(_gameTiming.CurTime);
+                _pressureDamageTraces.Add(uid, trace);
+            }
+
+            trace.Pressure = args.Pressure;
+            trace.DeltaPressure = args.DeltaPressure;
+            trace.EffectivePressure = args.EffectivePressure;
+            trace.DamagePerTick = args.Damage.GetTotal().Float();
+            trace.DamageBeforeLastTick = TryComp(uid, out DamageableComponent? damageable)
+                ? _damageable.GetTotalDamage((uid, damageable)).Float()
+                : 0f;
+            trace.Samples++;
+        }
+
+        private void OnDamageThresholdReached(Entity<DestructibleComponent> entity, ref DamageThresholdReached args)
+        {
+            if (_windowObservers.Count == 0 || !IsBreakThreshold(args))
+                return;
+
+            if (!_pressureDamageTraces.Remove(entity.Owner, out var trace))
+                return;
+
+            var finalDamage = TryComp(entity.Owner, out DamageableComponent? damageable)
+                ? _damageable.GetTotalDamage((entity.Owner, damageable)).Float()
+                : trace.DamageBeforeLastTick + trace.DamagePerTick;
+            var thresholdDamage = args.Threshold.Trigger is DamageTrigger trigger
+                ? trigger.Damage.Float()
+                : -1f;
+            var elapsed = _gameTiming.CurTime - trace.StartedAt;
+            var name = Exists(entity.Owner) ? ToPrettyString(entity.Owner) : $"entity {entity.Owner}";
+            var thresholdText = thresholdDamage >= 0f ? $"，损坏阈值 {thresholdDamage:F1}" : string.Empty;
+
+            var message =
+                $"[气压调试] {name} 在 {elapsed.TotalSeconds:F2} 秒后损坏；" +
+                $"损坏前气压 {trace.Pressure:F1}，压差 {trace.DeltaPressure:F1}，有效压力 {trace.EffectivePressure:F1}；" +
+                $"累计伤害 {trace.DamageBeforeLastTick:F1} + {trace.DamagePerTick:F1} = {finalDamage:F1}" +
+                $"，采样 {trace.Samples} 次{thresholdText}。";
+
+            _chatManager.ChatMessageToMany(
+                ChatChannel.Server,
+                message,
+                message,
+                EntityUid.Invalid,
+                hideChat: false,
+                recordReplay: false,
+                _windowObservers.Select(session => session.Channel).ToList(),
+                colorOverride: Color.OrangeRed);
+        }
+
+        private static bool IsBreakThreshold(DamageThresholdReached args)
+        {
+            return args.Threshold.Behaviors.Any(behavior =>
+                behavior is DoActsBehavior acts &&
+                (acts.HasAct(ThresholdActs.Breakage) || acts.HasAct(ThresholdActs.Destruction)));
         }
 
         private AtmosDebugOverlayData? ConvertTileToData(TileAtmosphere tile)
