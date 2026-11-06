@@ -19,7 +19,6 @@
   id: BaseDeltaPressureReinforcedPlasmaQuarter
   components:
   - type: DeltaPressure
-    useAbsolutePressure: false
     minPressure: 37500
     minPressureDelta: 25000
     maxEffectivePressure: 100000
@@ -44,7 +43,6 @@
   id: BaseDeltaPressurePlasmaQuarter
   components:
   - type: DeltaPressure
-    useAbsolutePressure: false
     minPressure: 18750
     minPressureDelta: 12500
     maxEffectivePressure: 50000
@@ -68,7 +66,6 @@
   id: BaseDeltaPressureReinforcedGlassQuarter
   components:
   - type: DeltaPressure
-    useAbsolutePressure: false
     minPressure: 3750
     minPressureDelta: 2500
     scalingType: Linear
@@ -91,7 +88,6 @@
   id: BaseDeltaPressureGlassQuarter
   components:
   - type: DeltaPressure
-    useAbsolutePressure: false
     minPressure: 250
     minPressureDelta: 187.5
     # Thin glass should crack gradually instead of taking a fixed hit every atmos cycle.

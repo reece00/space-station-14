@@ -222,7 +222,7 @@ public sealed partial class AtmosphereSystem
         float pressure,
         float delta)
     {
-        var aboveMinPressure = ent.Comp.UseAbsolutePressure && pressure > ent.Comp.MinPressure;
+        var aboveMinPressure = pressure > ent.Comp.MinPressure;
         var aboveMinDeltaPressure = delta > ent.Comp.MinPressureDelta;
         if (!aboveMinPressure && !aboveMinDeltaPressure)
         {
@@ -268,11 +268,8 @@ public sealed partial class AtmosphereSystem
     /// <param name="deltaPressure">The delta pressure being exerted on the entity.</param>
     private void PerformDamage(Entity<DeltaPressureComponent> ent, float pressure, float deltaPressure)
     {
-        var effectivePressure = deltaPressure - ent.Comp.MinPressureDelta;
-        if (ent.Comp.UseAbsolutePressure)
-            effectivePressure = Math.Max(pressure - ent.Comp.MinPressure, effectivePressure);
-
-        var maxPressureCapped = Math.Min(effectivePressure, ent.Comp.MaxEffectivePressure);
+        var maxPressure = Math.Max(pressure - ent.Comp.MinPressure, deltaPressure - ent.Comp.MinPressureDelta);
+        var maxPressureCapped = Math.Min(maxPressure, ent.Comp.MaxEffectivePressure);
         var appliedDamage = ScaleDamage(ent, ent.Comp.BaseDamage, maxPressureCapped);
 
         _damage.ChangeDamage(ent.Owner, appliedDamage, ignoreResistances: true, interruptsDoAfters: false);
