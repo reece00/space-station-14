@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Server.Administration.Logs;
+using Content.Server.GameTicking;
 using Content.Server.GameTicking.Rules.Components;
 using Content.Shared.GameTicking.Components;
 using Content.Shared.Random;
@@ -26,9 +27,30 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
     [Dependency] private IConfigurationManager _configurationManager = default!;
     [Dependency] private IAdminLogManager _adminLogger = default!;
 
+    private const int ConsecutiveRoundsBeforePenalty = 2;
+    private const float RepeatedModeWeightMultiplier = 0.2f;
+
+    private string? _lastPlayedMode;
+    private int _consecutiveModeRounds;
+    private string? _pendingSecretMode;
+
     public override void Initialize()
     {
         base.Initialize();
+        SubscribeLocalEvent<GameRunLevelChangedEvent>(OnRunLevelChanged);
+    }
+
+    private void OnRunLevelChanged(GameRunLevelChangedEvent args)
+    {
+        if (args.New != GameRunLevel.InRound)
+            return;
+
+        var currentPreset = (GameTicker as ServerGameTicker)?.CurrentPreset?.ID;
+        var playedMode = currentPreset == "Secret" ? _pendingSecretMode : currentPreset;
+        _consecutiveModeRounds = playedMode == null ? 0 :
+            playedMode == _lastPlayedMode ? _consecutiveModeRounds + 1 : 1;
+        _lastPlayedMode = playedMode;
+        _pendingSecretMode = null;
     }
 
     protected override void Added(Entity<SecretRuleComponent, GameRuleComponent> ent, ref GameRuleAddedEvent args)
@@ -42,6 +64,8 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
             Del(ent);
             return;
         }
+
+        _pendingSecretMode = preset.ID;
 
         Log.Info($"Selected {preset.ID} as the secret preset.");
         _adminLogger.Add(LogType.EventStarted, $"Selected {preset.ID} as the secret preset.");
@@ -84,6 +108,14 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
     {
         var options = ProtoMan.Index(weights).Weights.ShallowClone();
         var players = GameTicker.ReadyPlayerCount();
+
+        if (_consecutiveModeRounds >= ConsecutiveRoundsBeforePenalty &&
+            _lastPlayedMode is { } lastMode &&
+            options.TryGetValue(lastMode, out var weight))
+        {
+            Log.Info($"Applying repeat penalty to {lastMode} after {_consecutiveModeRounds} consecutive rounds.");
+            options[lastMode] = weight * RepeatedModeWeightMultiplier;
+        }
 
         GamePresetPrototype? selectedPreset = null;
         var sum = options.Values.Sum();
