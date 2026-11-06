@@ -399,19 +399,19 @@ public sealed partial class CCVars
         CVarDef.Create("game.secret_weight_prototype", "Secret", CVar.SERVERONLY);
 
     /// <summary>
-    ///     Whether Secret should reduce the weight of the preset that was played several rounds in a row.
+    ///     Whether secret lowers the weight of a preset that keeps repeating.
     /// </summary>
     public static readonly CVarDef<bool> SecretRepeatPenaltyEnabled =
         CVarDef.Create("game.secret_repeat_penalty_enabled", true, CVar.SERVERONLY);
 
     /// <summary>
-    ///     How many consecutive rounds of the same preset must have been played before Secret penalizes it.
+    ///     How many rounds in a row a preset must be played before secret lowers its weight.
     /// </summary>
     public static readonly CVarDef<int> SecretRepeatPenaltyRounds =
         CVarDef.Create("game.secret_repeat_penalty_rounds", 2, CVar.SERVERONLY);
 
     /// <summary>
-    ///     Multiplier applied to the Secret weight of a repeated preset. Clamped to the range 0 to 1.
+    ///     The weight multiplier for a repeating preset, between 0 and 1.
     /// </summary>
     public static readonly CVarDef<float> SecretRepeatPenaltyMultiplier =
         CVarDef.Create("game.secret_repeat_penalty_multiplier", 0.2f, CVar.SERVERONLY);

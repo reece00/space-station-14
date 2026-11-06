@@ -28,11 +28,8 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
 
     private const string SecretPresetId = "Secret";
 
-    // The preset actually played last round (for Secret, the preset it picked) and its current streak.
     private string? _lastPlayedPreset;
     private int _consecutivePresetRounds;
-
-    // The preset Secret picked for the round that is about to start.
     private string? _pendingSecretPreset;
 
     public override void Initialize()
@@ -46,7 +43,6 @@ public sealed partial class SecretRuleSystem : GameRuleSystem<SecretRuleComponen
         if (args.New != GameRunLevel.InRound)
             return;
 
-        // CurrentPreset only exists on the server ticker.
         var playedPreset = (GameTicker as ServerGameTicker)?.CurrentPreset?.ID;
         if (playedPreset == SecretPresetId)
             playedPreset = _pendingSecretPreset;
