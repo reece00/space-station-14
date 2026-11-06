@@ -30,7 +30,7 @@ internal sealed partial class WindowPressureDebugOverlay : Overlay
 
         _system = system;
         _transform = _entities.System<SharedTransformSystem>();
-        _font = new NotoFontFamilyStack(_resources).GetFont(12);
+        _font = new NotoFontFamilyStack(_resources).GetFont(8);
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -51,7 +51,7 @@ internal sealed partial class WindowPressureDebugOverlay : Overlay
                 if (!args.WorldAABB.Contains(worldPos))
                     continue;
 
-                var pos = _eye.WorldToScreen(worldPos + new Vector2(0f, 0.65f));
+                var pos = _eye.WorldToScreen(worldPos + new Vector2(0f, 1.45f));
                 var hp = data.BreakThreshold > 0
                     ? $"HP {MathF.Max(0f, data.BreakThreshold - data.Damage):0.#}/{data.BreakThreshold:0.#}  Damage {data.Damage:0.#}"
                     : $"Damage {data.Damage:0.#} (HP threshold unknown)";
