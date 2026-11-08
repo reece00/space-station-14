@@ -164,38 +164,28 @@ public partial class AtmosphereSystem
     }
 
     /// <summary>
-    /// Gets the containing mixture and reports whether a floor with no mixture is awaiting revalidation.
+    /// Returns true if the entity is on a floor tile whose air has not been created yet because
+    /// the tile is still waiting for atmosphere revalidation.
     /// </summary>
-    internal GasMixture? GetContainingMixture(Entity<TransformComponent?> ent, out bool awaitingTileAir)
+    internal bool IsAwaitingTileAir(Entity<TransformComponent?> ent)
     {
-        awaitingTileAir = false;
-        if (!Resolve(ent, ref ent.Comp))
-            return null;
-
-        if (TryGetExposedMixture(ent, out var mixture))
-            return mixture;
-
-        var grid = ent.Comp.GridUid;
-        var map = ent.Comp.MapUid;
-        var position = XformSystem.GetGridTilePositionOrDefault((ent, ent.Comp));
-        mixture = GetTileMixture(grid, map, position);
-        if (mixture != null || grid is not { } gridUid || map == null
+        if (!Resolve(ent, ref ent.Comp)
+            || ent.Comp.GridUid is not { } gridUid
             || !_gridAtmosQuery.TryGetComponent(gridUid, out var atmosphere)
-            || !atmosphere.Simulated || atmosphere.LifeStage >= ComponentLifeStage.Stopping || Paused(gridUid))
+            || !atmosphere.Simulated)
         {
-            return mixture;
+            return false;
         }
 
-        var awaitingRevalidation = atmosphere.InvalidatedCoords.Contains(position)
-            || (atmosphere.Tiles.TryGetValue(position, out var tileAtmosphere) && tileAtmosphere.RevalidationQueued);
-        if (!awaitingRevalidation)
-            return null;
+        var position = XformSystem.GetGridTilePositionOrDefault((ent, ent.Comp));
+        var queued = atmosphere.InvalidatedCoords.Contains(position)
+                     || (atmosphere.Tiles.TryGetValue(position, out var tileAtmosphere) && tileAtmosphere.RevalidationQueued);
 
-        awaitingTileAir = TryComp(gridUid, out MapGridComponent? mapGrid)
-            && _map.TryGetTile(mapGrid, position, out var tile)
-            && !tile.IsEmpty
-            && !((ContentTileDefinition) _tileDefinitionManager[tile.TypeId]).MapAtmosphere;
-        return null;
+        return queued
+               && TryComp(gridUid, out MapGridComponent? mapGrid)
+               && _map.TryGetTile(mapGrid, position, out var tile)
+               && !tile.IsEmpty
+               && !((ContentTileDefinition) _tileDefinitionManager[tile.TypeId]).MapAtmosphere;
     }
 
     /// <summary>
