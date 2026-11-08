@@ -199,6 +199,12 @@ public sealed partial class TileAtmosphere : IGasMixtureHolder
     public bool TrimQueued;
 
     /// <summary>
+    /// Whether this tile is in the current revalidation batch and still needs its adjacency and air updated.
+    /// </summary>
+    [ViewVariables]
+    public bool RevalidationQueued;
+
+    /// <summary>
     /// Cached information about airtight entities on this tile. This gets updated anytime a tile gets invalidated
     /// (i.e., gets added to <see cref="GridAtmosphereComponent.InvalidatedCoords"/>).
     /// </summary>

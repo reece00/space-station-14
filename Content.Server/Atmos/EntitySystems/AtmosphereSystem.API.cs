@@ -164,7 +164,7 @@ public partial class AtmosphereSystem
     }
 
     /// <summary>
-    /// Gets the containing mixture and reports whether a missing tile mixture is awaiting initialization.
+    /// Gets the containing mixture and reports whether a floor with no mixture is awaiting revalidation.
     /// </summary>
     internal GasMixture? GetContainingMixture(Entity<TransformComponent?> ent, out bool awaitingTileAir)
     {
@@ -181,17 +181,20 @@ public partial class AtmosphereSystem
         mixture = GetTileMixture(grid, map, position);
         if (mixture != null || grid is not { } gridUid || map == null
             || !_gridAtmosQuery.TryGetComponent(gridUid, out var atmosphere)
-            || !atmosphere.Simulated || atmosphere.LifeStage >= ComponentLifeStage.Stopping || Paused(gridUid)
-            || !TryComp(gridUid, out MapGridComponent? mapGrid)
-            || !_map.TryGetTile(mapGrid, position, out var tile) || tile.IsEmpty
-            || ((ContentTileDefinition) _tileDefinitionManager[tile.TypeId]).MapAtmosphere)
+            || !atmosphere.Simulated || atmosphere.LifeStage >= ComponentLifeStage.Stopping || Paused(gridUid))
         {
             return mixture;
         }
 
-        // Blockers can change before revalidation creates the tile's gas mixture.
-        var airtight = GetAirtightData(gridUid, mapGrid, position);
-        awaitingTileAir = airtight.BlockedDirections != AtmosDirection.All || !airtight.NoAirWhenBlocked;
+        var awaitingRevalidation = atmosphere.InvalidatedCoords.Contains(position)
+            || (atmosphere.Tiles.TryGetValue(position, out var tileAtmosphere) && tileAtmosphere.RevalidationQueued);
+        if (!awaitingRevalidation)
+            return null;
+
+        awaitingTileAir = TryComp(gridUid, out MapGridComponent? mapGrid)
+            && _map.TryGetTile(mapGrid, position, out var tile)
+            && !tile.IsEmpty
+            && !((ContentTileDefinition) _tileDefinitionManager[tile.TypeId]).MapAtmosphere;
         return null;
     }
 

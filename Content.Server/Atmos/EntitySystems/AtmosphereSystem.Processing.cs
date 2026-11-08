@@ -67,12 +67,15 @@ namespace Content.Server.Atmos.EntitySystems
 
             if (!atmosphere.ProcessingPaused)
             {
-                atmosphere.CurrentRunInvalidatedTiles.Clear();
+                while (atmosphere.CurrentRunInvalidatedTiles.TryDequeue(out var queuedTile))
+                    queuedTile.RevalidationQueued = false;
+
                 atmosphere.CurrentRunInvalidatedTiles.EnsureCapacity(atmosphere.InvalidatedCoords.Count);
                 foreach (var indices in atmosphere.InvalidatedCoords)
                 {
                     var tile = GetOrNewTile(uid, atmosphere, indices, invalidateNew: false);
                     atmosphere.CurrentRunInvalidatedTiles.Enqueue(tile);
+                    tile.RevalidationQueued = true;
 
                     // Update tile.IsSpace and tile.MapAtmosphere, and tile.AirtightData.
                     UpdateTileData(ent, mapAtmos, tile);
@@ -89,6 +92,7 @@ namespace Content.Server.Atmos.EntitySystems
                 DebugTools.Assert(atmosphere.Tiles.GetValueOrDefault(tile.GridIndices) == tile);
                 UpdateAdjacentTiles(ent, tile, activate: true);
                 UpdateTileAir(ent, tile, volume);
+                tile.RevalidationQueued = false;
                 InvalidateVisuals(ent, tile);
 
                 if (number++ < InvalidCoordinatesLagCheckIterations)
