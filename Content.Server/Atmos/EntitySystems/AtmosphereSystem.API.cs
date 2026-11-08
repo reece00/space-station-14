@@ -6,6 +6,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.Atmos.Reactions;
+using Content.Shared.Maps;
 using JetBrains.Annotations;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Utility;
@@ -160,6 +161,38 @@ public partial class AtmosphereSystem
 
         var position = XformSystem.GetGridTilePositionOrDefault((ent, ent.Comp));
         return GetTileMixture(grid, map, position, excite);
+    }
+
+    /// <summary>
+    /// Gets the containing mixture and reports whether a missing tile mixture is awaiting initialization.
+    /// </summary>
+    internal GasMixture? GetContainingMixture(Entity<TransformComponent?> ent, out bool awaitingTileAir)
+    {
+        awaitingTileAir = false;
+        if (!Resolve(ent, ref ent.Comp))
+            return null;
+
+        if (TryGetExposedMixture(ent, out var mixture))
+            return mixture;
+
+        var grid = ent.Comp.GridUid;
+        var map = ent.Comp.MapUid;
+        var position = XformSystem.GetGridTilePositionOrDefault((ent, ent.Comp));
+        mixture = GetTileMixture(grid, map, position);
+        if (mixture != null || grid is not { } gridUid || map == null
+            || !_gridAtmosQuery.TryGetComponent(gridUid, out var atmosphere)
+            || !atmosphere.Simulated || atmosphere.LifeStage >= ComponentLifeStage.Stopping || Paused(gridUid)
+            || !TryComp(gridUid, out MapGridComponent? mapGrid)
+            || !_map.TryGetTile(mapGrid, position, out var tile) || tile.IsEmpty
+            || ((ContentTileDefinition) _tileDefinitionManager[tile.TypeId]).MapAtmosphere)
+        {
+            return mixture;
+        }
+
+        // Blockers can change before revalidation creates the tile's gas mixture.
+        var airtight = GetAirtightData(gridUid, mapGrid, position);
+        awaitingTileAir = airtight.BlockedDirections != AtmosDirection.All || !airtight.NoAirWhenBlocked;
+        return null;
     }
 
     /// <summary>

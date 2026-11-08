@@ -221,12 +221,8 @@ namespace Content.Server.Atmos.EntitySystems
                 if (totalDamage >= barotrauma.MaxDamage)
                     continue;
 
-                var pressure = 1f;
-
-                if (_atmosphereSystem.GetContainingMixture(uid) is {} mixture)
-                {
-                    pressure = MathF.Max(mixture.Pressure, 1f);
-                }
+                var mixture = _atmosphereSystem.GetContainingMixture(uid, out var awaitingTileAir);
+                var pressure = MathF.Max(mixture?.Pressure ?? 1f, 1f);
 
                 pressure = pressure switch
                 {
@@ -247,7 +243,8 @@ namespace Content.Server.Atmos.EntitySystems
                         _adminLogger.Add(LogType.Barotrauma, $"{ToPrettyString(uid):entity} started taking low pressure damage");
                     }
 
-                    _alertsSystem.ShowAlert(uid, barotrauma.LowPressureAlert, 2);
+                    if (!awaitingTileAir)
+                        _alertsSystem.ShowAlert(uid, barotrauma.LowPressureAlert, 2);
                 }
                 else if (pressure >= Atmospherics.HazardHighPressure)
                 {
@@ -277,7 +274,8 @@ namespace Content.Server.Atmos.EntitySystems
                     switch (pressure)
                     {
                         case <= Atmospherics.WarningLowPressure:
-                            _alertsSystem.ShowAlert(uid, barotrauma.LowPressureAlert, 1);
+                            if (!awaitingTileAir)
+                                _alertsSystem.ShowAlert(uid, barotrauma.LowPressureAlert, 1);
                             break;
                         case >= Atmospherics.WarningHighPressure:
                             _alertsSystem.ShowAlert(uid, barotrauma.HighPressureAlert, 1);
