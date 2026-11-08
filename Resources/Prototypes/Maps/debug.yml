@@ -42,3 +42,34 @@
         - type: StationJobs
           availableJobs:
             ChiefEngineer: [ -1, -1 ]
+
+- type: gameMap
+  id: ManualWindowTest
+  mapName: Manual Window Test
+  mapPath: /Maps/Test/Atmospherics/DeltaPressure/manual_window_test.yml
+  minPlayers: 0
+  stations:
+    ManualWindowTest:
+      stationProto: StandardNanotrasenStation
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: "Manual Window Test"
+        - type: StationJobs
+          availableJobs:
+            Passenger: [ -1, -1 ]
+            Captain: [ -1, -1 ]
+
+- type: gameMap
+  id: WindowBreakTest
+  mapName: Window Break Test
+  mapPath: /Maps/Test/Atmospherics/DeltaPressure/window_break_test.yml
+  minPlayers: 0
+  stations:
+    WindowBreakTest:
+      stationProto: StandardNanotrasenStation
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: "Window Break Test"
+        - type: StationJobs
+          availableJobs:
+            Passenger: [ -1, -1 ]

@@ -1,0 +1,646 @@
+meta:
+  format: 7
+  category: Map
+  engineVersion: 265.0.0
+  forkId: ""
+  forkVersion: ""
+  time: 11/06/2026 21:58:00
+  entityCount: 74
+maps:
+- 1
+grids:
+- 2
+orphans: []
+nullspace: []
+tilemap:
+  0: Space
+  1: Plating
+entities:
+- proto: ""
+  entities:
+  - uid: 1
+    components:
+    - type: MetaData
+      name: Map Entity
+    - type: Transform
+    - type: Map
+      mapPaused: False
+    - type: GridTree
+    - type: Broadphase
+    - type: OccluderTree
+  - uid: 2
+    components:
+    - type: MetaData
+      name: Open-Plan Fan-Divided Test Station
+    - type: Transform
+      parent: 1
+    - type: MapGrid
+      chunks:
+        0,0:
+          ind: 0,0
+          tiles: AQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAABAAAAAAAAAQAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+          version: 7
+    - type: Broadphase
+    - type: Physics
+      bodyStatus: InAir
+      fixedRotation: False
+      bodyType: Dynamic
+    - type: Fixtures
+      fixtures: {}
+    - type: BecomesStation
+      id: ManualWindowTest
+    - type: OccluderTree
+    - type: SpreaderGrid
+    - type: Shuttle
+      dampingModifier: 0.25
+    - type: ImplicitRoof
+    - type: GridPathfinding
+    - type: Gravity
+      enabled: true
+      inherent: true
+    - type: DecalGrid
+      chunkCollection:
+        version: 2
+        nodes: []
+    - type: GridAtmosphere
+      version: 2
+      data:
+        tiles:
+          0,0:
+            0: 52448
+            2: 512
+            3: 8192
+          0,1:
+            0: 52428
+            4: 2
+            5: 32
+            6: 512
+            7: 8192
+          1,0:
+            0: 4592
+            1: 3584
+            2: 57344
+          1,1:
+            0: 65535
+        uniqueMixes:
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 21.8249
+          - 82.1031
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 43.079
+          - 162.0589
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 64.6184
+          - 243.0884
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 86.1579
+          - 324.1179
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 215.3948
+          - 810.2947
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 753.8818
+          - 2836.0316
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 4307.8961
+          - 16205.8947
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          immutable: true
+          moles:
+          - 7538.8181
+          - 28360.3157
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        chunkSize: 4
+    - type: GasTileOverlay
+    - type: RadiationGridResistance
+- proto: AtmosDeviceFanDirectional
+  entities:
+  - uid: 3
+    components:
+    - type: Transform
+      pos: 1.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 4
+    components:
+    - type: Transform
+      pos: 2.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 5
+    components:
+    - type: Transform
+      pos: 3.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 6
+    components:
+    - type: Transform
+      pos: 5.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 7
+    components:
+    - type: Transform
+      pos: 6.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 8
+    components:
+    - type: Transform
+      pos: 7.5,2.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 9
+    components:
+    - type: Transform
+      pos: 1.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 10
+    components:
+    - type: Transform
+      pos: 2.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 11
+    components:
+    - type: Transform
+      pos: 3.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 12
+    components:
+    - type: Transform
+      pos: 5.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 13
+    components:
+    - type: Transform
+      pos: 6.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 14
+    components:
+    - type: Transform
+      pos: 7.5,3.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 15
+    components:
+    - type: Transform
+      pos: 1.5,4.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 16
+    components:
+    - type: Transform
+      pos: 2.5,4.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 17
+    components:
+    - type: Transform
+      pos: 3.5,4.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 18
+    components:
+    - type: Transform
+      pos: 1.5,5.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 19
+    components:
+    - type: Transform
+      pos: 2.5,5.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 20
+    components:
+    - type: Transform
+      pos: 3.5,5.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 21
+    components:
+    - type: Transform
+      pos: 1.5,6.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 22
+    components:
+    - type: Transform
+      pos: 2.5,6.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 23
+    components:
+    - type: Transform
+      pos: 3.5,6.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 24
+    components:
+    - type: Transform
+      pos: 1.5,7.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 25
+    components:
+    - type: Transform
+      pos: 2.5,7.5
+      rot: 0.0 rad
+      parent: 2
+  - uid: 26
+    components:
+    - type: Transform
+      pos: 3.5,7.5
+      rot: 0.0 rad
+      parent: 2
+- proto: SignBlankMed
+  entities:
+  - uid: 27
+    components:
+    - type: MetaData
+      name: "DIFF: 300 kPa vs 101 kPa"
+      description: "High: 300 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,2.5
+      parent: 2
+  - uid: 28
+    components:
+    - type: MetaData
+      name: "EQUAL: 200 / 200 kPa"
+      description: "Zero Delta (Both: 200 kPa)"
+    - type: Transform
+      pos: 6.5,2.5
+      parent: 2
+  - uid: 29
+    components:
+    - type: MetaData
+      name: "DIFF: 400 kPa vs 101 kPa"
+      description: "High: 400 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,3.5
+      parent: 2
+  - uid: 30
+    components:
+    - type: MetaData
+      name: "EQUAL: 300 / 300 kPa"
+      description: "Zero Delta (Both: 300 kPa)"
+    - type: Transform
+      pos: 6.5,3.5
+      parent: 2
+  - uid: 31
+    components:
+    - type: MetaData
+      name: "DIFF: 1000 kPa vs 101 kPa"
+      description: "High: 1000 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,4.5
+      parent: 2
+  - uid: 32
+    components:
+    - type: MetaData
+      name: "DIFF: 3500 kPa vs 101 kPa"
+      description: "High: 3500 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,5.5
+      parent: 2
+  - uid: 33
+    components:
+    - type: MetaData
+      name: "DIFF: 20000 kPa vs 101 kPa"
+      description: "High: 20000 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,6.5
+      parent: 2
+  - uid: 34
+    components:
+    - type: MetaData
+      name: "DIFF: 35000 kPa vs 101 kPa"
+      description: "High: 35000 kPa (W) | Low: 101.325 kPa (E)"
+    - type: Transform
+      pos: 2.5,7.5
+      parent: 2
+- proto: AlwaysPoweredWallLight
+  entities:
+  - uid: 35
+    components:
+    - type: Transform
+      pos: 4.5,1.5
+      rot: 3.141592653589793 rad
+      parent: 2
+  - uid: 36
+    components:
+    - type: Transform
+      pos: 4.5,4.5
+      rot: 3.141592653589793 rad
+      parent: 2
+  - uid: 37
+    components:
+    - type: Transform
+      pos: 4.5,7.5
+      rot: 3.141592653589793 rad
+      parent: 2
+- proto: GeneratorRTG
+  entities:
+  - uid: 38
+    components:
+    - type: Transform
+      pos: 4.5,0.5
+      parent: 2
+- proto: APCHyperCapacity
+  entities:
+  - uid: 39
+    components:
+    - type: Transform
+      pos: 4.5,2.5
+      parent: 2
+- proto: SpawnPointAnyJob
+  entities:
+  - uid: 40
+    components:
+    - type: Transform
+      pos: 4.5,1.5
+      parent: 2
+- proto: SpawnPointLatejoin
+  entities:
+  - uid: 41
+    components:
+    - type: Transform
+      pos: 4.5,1.5
+      parent: 2
+- proto: SpawnPointCaptain
+  entities:
+  - uid: 42
+    components:
+    - type: Transform
+      pos: 4.5,1.5
+      parent: 2
+- proto: WallPlastitaniumIndestructible
+  entities:
+  - uid: 43
+    components:
+    - type: Transform
+      pos: 0.5,0.5
+      parent: 2
+  - uid: 44
+    components:
+    - type: Transform
+      pos: 0.5,1.5
+      parent: 2
+  - uid: 45
+    components:
+    - type: Transform
+      pos: 0.5,2.5
+      parent: 2
+  - uid: 46
+    components:
+    - type: Transform
+      pos: 0.5,3.5
+      parent: 2
+  - uid: 47
+    components:
+    - type: Transform
+      pos: 0.5,4.5
+      parent: 2
+  - uid: 48
+    components:
+    - type: Transform
+      pos: 0.5,5.5
+      parent: 2
+  - uid: 49
+    components:
+    - type: Transform
+      pos: 0.5,6.5
+      parent: 2
+  - uid: 50
+    components:
+    - type: Transform
+      pos: 0.5,7.5
+      parent: 2
+  - uid: 51
+    components:
+    - type: Transform
+      pos: 0.5,8.5
+      parent: 2
+  - uid: 52
+    components:
+    - type: Transform
+      pos: 1.5,0.5
+      parent: 2
+  - uid: 53
+    components:
+    - type: Transform
+      pos: 1.5,8.5
+      parent: 2
+  - uid: 54
+    components:
+    - type: Transform
+      pos: 2.5,0.5
+      parent: 2
+  - uid: 55
+    components:
+    - type: Transform
+      pos: 2.5,8.5
+      parent: 2
+  - uid: 56
+    components:
+    - type: Transform
+      pos: 3.5,0.5
+      parent: 2
+  - uid: 57
+    components:
+    - type: Transform
+      pos: 3.5,8.5
+      parent: 2
+  - uid: 58
+    components:
+    - type: Transform
+      pos: 4.5,0.5
+      parent: 2
+  - uid: 59
+    components:
+    - type: Transform
+      pos: 4.5,8.5
+      parent: 2
+  - uid: 60
+    components:
+    - type: Transform
+      pos: 5.5,0.5
+      parent: 2
+  - uid: 61
+    components:
+    - type: Transform
+      pos: 5.5,8.5
+      parent: 2
+  - uid: 62
+    components:
+    - type: Transform
+      pos: 6.5,0.5
+      parent: 2
+  - uid: 63
+    components:
+    - type: Transform
+      pos: 6.5,8.5
+      parent: 2
+  - uid: 64
+    components:
+    - type: Transform
+      pos: 7.5,0.5
+      parent: 2
+  - uid: 65
+    components:
+    - type: Transform
+      pos: 7.5,8.5
+      parent: 2
+  - uid: 66
+    components:
+    - type: Transform
+      pos: 8.5,0.5
+      parent: 2
+  - uid: 67
+    components:
+    - type: Transform
+      pos: 8.5,1.5
+      parent: 2
+  - uid: 68
+    components:
+    - type: Transform
+      pos: 8.5,2.5
+      parent: 2
+  - uid: 69
+    components:
+    - type: Transform
+      pos: 8.5,3.5
+      parent: 2
+  - uid: 70
+    components:
+    - type: Transform
+      pos: 8.5,4.5
+      parent: 2
+  - uid: 71
+    components:
+    - type: Transform
+      pos: 8.5,5.5
+      parent: 2
+  - uid: 72
+    components:
+    - type: Transform
+      pos: 8.5,6.5
+      parent: 2
+  - uid: 73
+    components:
+    - type: Transform
+      pos: 8.5,7.5
+      parent: 2
+  - uid: 74
+    components:
+    - type: Transform
+      pos: 8.5,8.5
+      parent: 2
+...
